@@ -1,4 +1,4 @@
-This app build using ABP framework that use DDD patern
+This a web API app (without Angular) build using ABP framework that use DDD patern (only)
 
 -------------------------------------------------------------
 Features:
