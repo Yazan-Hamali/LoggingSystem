@@ -1,4 +1,4 @@
-This app build using ABB framework that use DDD patern
+This app build using ABP framework that use DDD patern
 
 Features:
 Store logs in SQL DB
