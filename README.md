@@ -7,12 +7,14 @@ Store logs in SQL DB
 
 Store logs in LocalFiles
 
-Sotre logs in S3Bucket (I used wasabisys.com that uses S3 protocol same as AWS S3)
+Sotre logs in S3Bucket (used wasabisys.com that uses S3 protocol same as AWS S3)
 
 ---------------------------------------------
 
 sys req:
+
 .Net 7.0
+
 ---------------------------------------------
 
 Testing steps:
@@ -23,7 +25,7 @@ Testing steps:
 
 3-Run LoggingSystem.DbMigrator project to start migrations and build Database
 
-4-Make LoggingSystem.HttpApi.Host as startup
+4-Make LoggingSystem.HttpApi.Host as startup project
 
 5-Run LoggingSystem.HttpApi.Host project
 
