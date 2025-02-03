@@ -11,8 +11,8 @@ public static class AwsV4Signer
         var time = now.ToString("yyyyMMddTHHmmssZ");
         var scope = $"{date}/{region}/{service}/aws4_request";
 
-        var canonicalHeaders = $"host:{service}.{region}.{provider}\nx-amz-date:{time}\n";
-        var signedHeaders = "host;x-amz-date";
+        var canonicalHeaders = $"host:{service}.{region}.{provider}\nx-amz-content-sha256:{payloadHash}\nx-amz-date:{time}\n";
+        var signedHeaders = "host;x-amz-content-sha256;x-amz-date";
 
         var canonicalRequest = $"{httpMethod}\n{canonicalUri}\n{canonicalQueryString}\n{canonicalHeaders}\n{signedHeaders}\n{payloadHash}";
 

@@ -31,7 +31,7 @@ public class S3Client:DomainService
         var payloadHash = AwsV4Signer.ToHexString(AwsV4Signer.SHA256Hash(content));
         var canonicalUri = $"/{objectKey}";
         var canonicalQueryString = "";
-        //_httpClient.de
+
         var authorization = AwsV4Signer.SignRequest(provider,accessKey, secretKey, region, "s3", "PUT", canonicalUri, canonicalQueryString, payloadHash, now);
 
         var request = new HttpRequestMessage(HttpMethod.Put, $"https://{bucketName}.s3.{region}.{provider}/{objectKey}")
@@ -40,28 +40,14 @@ public class S3Client:DomainService
         };
 
         request.Headers.Add("x-amz-date", now.ToString("yyyyMMddTHHmmssZ"));
-        try
-        {
-            request.Headers.Authorization = new AuthenticationHeaderValue("AWS4-HMAC-SHA256", authorization.ToString());
-            //request.Headers.Authorization = new AuthenticationHeaderValue("AWS4-HMAC-SHA256", authorization.Split(',')[2].Split('=')[1]);
-            //request.Headers.Authorization = new AuthenticationHeaderValue(authorization.ToString());
-            //request.Headers.Add("Authorization", authorization.ToString());
-
-        }
-        catch(Exception e) { }
-
-        //request.AddHeader("Authorization", "AWS4-HMAC-SHA256 Credential=0XFWQZTPDWO2EYKRF1D3/20250203/us-east-1/s3/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature=8f149e9b16c2bf4837395e0192fd4ad18293f3d0a3dc65239438f445a026d5ed")
-
+        request.Headers.Add("x-amz-content-sha256", payloadHash);
+        request.Headers.Authorization = new AuthenticationHeaderValue("AWS4-HMAC-SHA256", authorization.ToString());
         try
         {
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
         }
-        catch (Exception e)
-        {
-
-            throw;
-        }
+        catch(Exception e) { }
         
     }
 
@@ -76,11 +62,21 @@ public class S3Client:DomainService
 
         var request = new HttpRequestMessage(HttpMethod.Get, $"https://{bucketName}.s3.{region}.{provider}/{objectKey}");
         request.Headers.Add("x-amz-date", now.ToString("yyyyMMddTHHmmssZ"));
-        request.Headers.Add("Authorization", authorization);
-
-        var response = await _httpClient.SendAsync(request);
-        response.EnsureSuccessStatusCode();
-
-        return await response.Content.ReadAsStringAsync();
+        request.Headers.Add("x-amz-content-sha256", payloadHash);
+        request.Headers.Authorization = new AuthenticationHeaderValue("AWS4-HMAC-SHA256", authorization.ToString());
+        
+        try
+        {
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsStringAsync();
+        }
+        catch (Exception e)
+        {
+            return "[]";
+            throw;
+        }
+        
+        
     }
 }
