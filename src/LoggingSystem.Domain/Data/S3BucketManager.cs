@@ -83,15 +83,19 @@ namespace LoggingSystem.Data
                 StorageType = "LocalFile"
             };
         }
-        public LogEntryListDto GetListAsync(string service = null, string message = null, DateTime? DateMin = null, DateTime? DateMax = null, LevelEnum? level = null, string sorting = null, int maxResultCount = int.MaxValue, int skipCount = 0, CancellationToken cancellationToken = default)
+        public async Task<LogEntryListDto> GetListAsync(string service = null, string message = null, DateTime? DateMin = null, DateTime? DateMax = null, LevelEnum? level = null, string sorting = null, int maxResultCount = int.MaxValue, int skipCount = 0, CancellationToken cancellationToken = default)
         {
             var logs = new List<LogEntry>();
 
-            // Retrieve logs from all files in the log directory
-            foreach (var filePath in Directory.GetFiles(_logDirectory, "*.log"))
+            try
             {
-                var fileLogs = GetLogsFromFile(filePath);
-                logs.AddRange(fileLogs);
+                var file = await _client.GetObjectAsync("loggs.log");
+                var jsonList= JsonConvert.DeserializeObject<List<LogEntry>>(file) ?? new List<LogEntry>();
+                logs.AddRange(jsonList);
+            }
+            catch(Exception e)
+            {
+               
             }
 
             var query = ApplyFilter(logs, service, message, DateMin, DateMax, level);

@@ -107,6 +107,23 @@ namespace LoggingSystem
                             Items = res.Items
                         };
 
+                    case "S3Bucket":
+                        var bucketRes = await _S3BucketManager.GetListAsync(
+                            service: input.Service,
+                            message: input.Message,
+                            DateMin: input.StartTime,
+                            DateMax: input.EndTime,
+                            level: input.Level,
+                            sorting: input.Sorting,
+                            maxResultCount: input.MaxResultCount,
+                            skipCount: input.SkipCount
+                            );
+                        return new PagedResultDto<LogEntrySharedDto>
+                        {
+                            TotalCount = bucketRes.Count,
+                            Items = bucketRes.Items
+                        };
+
                     default:
                         throw new BusinessException("Please setup storage provider");
                 }
