@@ -18,12 +18,14 @@ namespace LoggingSystem.Entites
         private readonly ILogEntryRepo _LogEntryRepository;
         private readonly IConfiguration _configuration;
         private readonly DataBaseManager _DBManager;
+        private readonly LocalFilesManager _LocalFilesManager;
 
-        public LogEntryManager(ILogEntryRepo logEntryRepository, IConfiguration configuration, DataBaseManager dBManager)
+        public LogEntryManager(ILogEntryRepo logEntryRepository, IConfiguration configuration, DataBaseManager dBManager, LocalFilesManager localFilesManager)
         {
             _LogEntryRepository = logEntryRepository;
             _configuration = configuration;
             _DBManager = dBManager;
+            _LocalFilesManager = localFilesManager;
         }
 
         public async Task<LogEntrySharedDto> CreateAsync(
@@ -43,6 +45,8 @@ namespace LoggingSystem.Entites
             {
                 case "DB":
                     return await _DBManager.CreateAsync(service, message, time, level);
+                case "LocalFiles":
+                    return await _LocalFilesManager.CreateAsync(service, message, time, level);
 
                 default:
                     throw new BusinessException("Please setup storage provider");
@@ -65,6 +69,17 @@ namespace LoggingSystem.Entites
                     maxResultCount: maxResultCount,
                     skipCount: skipCount
                     );
+                case "LocalFiles":
+                    return  _LocalFilesManager.GetListAsync(
+                    service: service,
+                    message: message,
+                    DateMin: DateMin,
+                    DateMax: DateMax,
+                    level: level,
+                    sorting: sorting,
+                    maxResultCount: maxResultCount,
+                    skipCount: skipCount
+                    );
 
                 default:
                     throw new BusinessException("Please setup storage provider");
@@ -76,6 +91,14 @@ namespace LoggingSystem.Entites
             {
                 case "DB":
                     return await _DBManager.GetCountAsync(
+                    service: service,
+                    message: message,
+                    DateMin: DateMin,
+                    DateMax: DateMax,
+                    level: level
+                    );
+                case "LocalFiles":
+                    return _LocalFilesManager.GetCountAsync(
                     service: service,
                     message: message,
                     DateMin: DateMin,

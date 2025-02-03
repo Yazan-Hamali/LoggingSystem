@@ -27,14 +27,14 @@ namespace LoggingSystem.Entites
 
         }
 
-        public LogEntry(string service, string message, DateTime time, LevelEnum level)
+        public LogEntry(Guid id,string service, string message, DateTime time, LevelEnum level)
         {
 
             Check.NotNullOrWhiteSpace(service, nameof(service));
             Check.NotNullOrWhiteSpace(message, nameof(message));
             Check.NotNull(time, nameof(time));
             Check.NotNull(level, nameof(level));
-
+            Id = id;
             Service = service;
             Message = message;
             TimeStamp = time;

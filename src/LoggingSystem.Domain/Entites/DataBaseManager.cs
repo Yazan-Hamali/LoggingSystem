@@ -31,6 +31,7 @@ namespace LoggingSystem.Entites
         {
 
             var Item = new LogEntry(
+                Guid.NewGuid(),
                 service,
                 message,
                 time,
