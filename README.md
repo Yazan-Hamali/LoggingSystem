@@ -1,5 +1,6 @@
 This app build using ABP framework that use DDD patern
 
+-------------------------------------------------------------
 Features:
 
 Store logs in SQL DB
@@ -8,8 +9,11 @@ Store logs in LocalFiles
 
 Sotre logs in S3Bucket (I used wasabisys.com that uses S3 protocol same as AWS S3)
 
+---------------------------------------------
+
 sys req:
 .Net 7.0
+---------------------------------------------
 
 Testing steps:
 
