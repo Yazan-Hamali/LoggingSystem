@@ -2,6 +2,7 @@
 using LoggingSystem.Entites;
 using LoggingSystem.Permissions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,24 +17,37 @@ namespace LoggingSystem
 {
     public class LogEntryAppService : LoggingSystemAppService, ILogEntryAppService
     {
-        private readonly ILogEntryRepo _logRepo;
-        private readonly LogEntryManager _logEntryManager;
+        private readonly IConfiguration _configuration;
+        private readonly DataBaseManager _DBManager;
+        private readonly LocalFilesManager _LocalFilesManager;
 
-        public LogEntryAppService(ILogEntryRepo logRepo, LogEntryManager logEntryManager)
+        public LogEntryAppService(IConfiguration configuration, DataBaseManager dBManager, LocalFilesManager localFilesManager)
         {
-            _logRepo = logRepo;
-            _logEntryManager = logEntryManager;
+            _configuration = configuration;
+            _DBManager = dBManager;
+            _LocalFilesManager = localFilesManager;
         }
         [Authorize(LoggingSystemPermissions.LogEntry.Create)]
         public async Task<LogEntrySharedDto> CreateAsync(LogEntryCreateDto input)
         {
             try
             {
-                return await _logEntryManager.CreateAsync(input.Service, input.Message, input.TimeStamp.Value, input.Level);
-                
-                //var res= ObjectMapper.Map<LogEntry, LogEntrySharedDto>(item);
-                //res.StorageType = "Database";
-                //return res;
+                Check.NotNullOrWhiteSpace(input.Service, nameof(input.Service));
+                Check.NotNullOrWhiteSpace(input.Message, nameof(input.Message));
+                Check.NotNull(input.TimeStamp, nameof(input.TimeStamp));
+                Check.NotNull(input.Level, nameof(input.Level));
+                Check.Length(input.Service, nameof(input.Service), LogEntryConsts.ServiceMaxLength, LogEntryConsts.ServiceMinLength);
+                Check.Length(input.Message, nameof(input.Message), LogEntryConsts.MessageMaxLength, LogEntryConsts.MessageMinLength);
+                switch (_configuration["Storage"])
+                {
+                    case "DB":
+                        return await _DBManager.CreateAsync(input.Service, input.Message, input.TimeStamp.Value, input.Level);
+                    case "LocalFiles":
+                        return await _LocalFilesManager.CreateAsync(input.Service, input.Message, input.TimeStamp.Value, input.Level);
+
+                    default:
+                        throw new BusinessException("Please setup storage provider");
+                }
 
             }
             catch (BusinessException e)
@@ -46,28 +60,51 @@ namespace LoggingSystem
         {
             try
             {
-                var items = await _logEntryManager.GetListAsync(
-                service: input.Service,
-                message: input.Message,
-                DateMin: input.StartTime,
-                DateMax: input.EndTime,
-                level: input.Level,
-                sorting: input.Sorting,
-                maxResultCount: input.MaxResultCount,
-                skipCount: input.SkipCount
-                );
-                var total = await _logEntryManager.GetCountAsync(
-                    service: input.Service,
-                    message: input.Message,
-                    DateMin: input.StartTime,
-                    DateMax: input.EndTime,
-                    level: input.Level
-                    );
-                return new PagedResultDto<LogEntrySharedDto>
+                switch (_configuration["Storage"])
                 {
-                    TotalCount = total,
-                    Items = items
-                };
+                    case "DB":
+                        var items1= await _DBManager.GetListAsync(
+                            service: input.Service,
+                            message: input.Message,
+                            DateMin: input.StartTime,
+                            DateMax: input.EndTime,
+                            level: input.Level,
+                            sorting: input.Sorting,
+                            maxResultCount: input.MaxResultCount,
+                            skipCount: input.SkipCount
+                            );
+                        var total1 = await _DBManager.GetCountAsync(
+                            service: input.Service,
+                            message: input.Message,
+                            DateMin: input.StartTime,
+                            DateMax: input.EndTime,
+                            level: input.Level
+                            );
+                        return new PagedResultDto<LogEntrySharedDto>
+                        {
+                            TotalCount = total1,
+                            Items = items1
+                        };
+                    case "LocalFiles":
+                        var res= _LocalFilesManager.GetListAsync(
+                            service: input.Service,
+                            message: input.Message,
+                            DateMin: input.StartTime,
+                            DateMax: input.EndTime,
+                            level: input.Level,
+                            sorting: input.Sorting,
+                            maxResultCount: input.MaxResultCount,
+                            skipCount: input.SkipCount
+                            );
+                        return new PagedResultDto<LogEntrySharedDto>
+                        {
+                            TotalCount = res.Count,
+                            Items = res.Items
+                        };
+
+                    default:
+                        throw new BusinessException("Please setup storage provider");
+                }
 
             }
             catch (BusinessException e)

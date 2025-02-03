@@ -80,7 +80,7 @@ namespace LoggingSystem.Entites
                 StorageType = "LocalFile"
             };
         }
-        public List<LogEntrySharedDto> GetListAsync(string service = null, string message = null, DateTime? DateMin = null, DateTime? DateMax = null, LevelEnum? level = null, string sorting = null, int maxResultCount = int.MaxValue, int skipCount = 0, CancellationToken cancellationToken = default)
+        public LogEntryListDto GetListAsync(string service = null, string message = null, DateTime? DateMin = null, DateTime? DateMax = null, LevelEnum? level = null, string sorting = null, int maxResultCount = int.MaxValue, int skipCount = 0, CancellationToken cancellationToken = default)
         {
             var logs = new List<LogEntry>();
 
@@ -92,17 +92,23 @@ namespace LoggingSystem.Entites
             }
 
             var query = ApplyFilter(logs,service,message,DateMin,DateMax,level);
-            var items = query.Skip(skipCount).Take(maxResultCount).ToList();
-            return items.Select(x => new LogEntrySharedDto
-            {
-                Id = x.Id,
-                Level = x.Level,
-                Message = x.Message,
-                Service = x.Service,
-                TimeStamp = x.TimeStamp,
-                StorageType = "LocalFiles",
+            long total = query.LongCount();
+            var res = query.Skip(skipCount).Take(maxResultCount).ToList();
 
-            }).ToList();
+            return new LogEntryListDto
+            {
+                Count = total,
+                Items = res.Select(x => new LogEntrySharedDto
+                {
+                    Id = x.Id,
+                    Level = x.Level,
+                    Message = x.Message,
+                    Service = x.Service,
+                    TimeStamp = x.TimeStamp,
+                    StorageType = "LocalFiles",
+
+                }).ToList()
+            };
             //query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? LogEntryConsts.GetDefaultSorting(false) : sorting);
             //return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
 
@@ -174,20 +180,7 @@ namespace LoggingSystem.Entites
 
         
 
-        public  long GetCountAsync(string service = null, string message = null, DateTime? DateMin = null, DateTime? DateMax = null, LevelEnum? level = null, CancellationToken cancellationToken = default)
-        {
-            var logs = new List<LogEntry>();
 
-            // Retrieve logs from all files in the log directory
-            foreach (var filePath in Directory.GetFiles(_logDirectory, "*.log"))
-            {
-                var fileLogs = GetLogsFromFile(filePath);
-                logs.AddRange(fileLogs);
-            }
-
-            var query = ApplyFilter(logs, service, message, DateMin, DateMax, level);
-            return query.LongCount();
-        }
 
     }
 }
