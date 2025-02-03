@@ -1,4 +1,5 @@
 ﻿using LoggingSystem.Dtos;
+using LoggingSystem.Entites;
 using LoggingSystem.Enums;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -16,7 +17,7 @@ using System.Timers;
 using Volo.Abp;
 using Volo.Abp.Domain.Services;
 
-namespace LoggingSystem.Entites
+namespace LoggingSystem.Data
 {
     public class LocalFilesManager : DomainService
     {
@@ -52,10 +53,10 @@ namespace LoggingSystem.Entites
             var newList = new List<LogEntry>();
             newList.Add(Item);
             if (Path.Exists(logFilePath))
-            { 
+            {
                 var oldJson = GetLogsFromFile(logFilePath);
                 newList.AddRange(oldJson);
-                
+
                 // Create a log entry as a JSON string
                 string logJson = JsonConvert.SerializeObject(newList);
                 // Update log entry to the file
@@ -91,7 +92,7 @@ namespace LoggingSystem.Entites
                 logs.AddRange(fileLogs);
             }
 
-            var query = ApplyFilter(logs,service,message,DateMin,DateMax,level);
+            var query = ApplyFilter(logs, service, message, DateMin, DateMax, level);
             long total = query.LongCount();
             var res = query.Skip(skipCount).Take(maxResultCount).ToList();
 
@@ -115,8 +116,8 @@ namespace LoggingSystem.Entites
         }
         private IEnumerable<LogEntry> ApplyFilter(
             IEnumerable<LogEntry> logs,
-            string? service = null,
-            string? message = null,
+            string service = null,
+            string message = null,
             DateTime? DateMin = null,
             DateTime? DateMax = null,
             LevelEnum? level = null)
@@ -127,7 +128,7 @@ namespace LoggingSystem.Entites
                     .WhereIf(DateMin.HasValue, e => e.TimeStamp >= DateMin.Value)
                     .WhereIf(DateMax.HasValue, e => e.TimeStamp <= DateMax.Value);
         }
-        public List<LogEntry> GetLogs(string? level = null, string? service = null, DateTime? startTime = null, DateTime? endTime = null)
+        public List<LogEntry> GetLogs(string level = null, string service = null, DateTime? startTime = null, DateTime? endTime = null)
         {
             var logs = new List<LogEntry>();
 
@@ -178,7 +179,7 @@ namespace LoggingSystem.Entites
 
 
 
-        
+
 
 
 

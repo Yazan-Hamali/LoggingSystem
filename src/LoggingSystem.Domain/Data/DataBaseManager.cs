@@ -1,4 +1,5 @@
 ﻿using LoggingSystem.Dtos;
+using LoggingSystem.Entites;
 using LoggingSystem.Enums;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -11,7 +12,7 @@ using System.Timers;
 using Volo.Abp;
 using Volo.Abp.Domain.Services;
 
-namespace LoggingSystem.Entites
+namespace LoggingSystem.Data
 {
     public class DataBaseManager : DomainService
     {
@@ -49,8 +50,8 @@ namespace LoggingSystem.Entites
                 StorageType = "Database"
             };
         }
-        
-      
+
+
 
         public async Task<List<LogEntrySharedDto>> GetListAsync(string service = null, string message = null, DateTime? DateMin = null, DateTime? DateMax = null, LevelEnum? level = null, string sorting = null, int maxResultCount = int.MaxValue, int skipCount = 0, CancellationToken cancellationToken = default)
         {
@@ -75,7 +76,7 @@ namespace LoggingSystem.Entites
 
             }).ToList();
         }
-        
+
         public async Task<long> GetCountAsync(string service = null, string message = null, DateTime? DateMin = null, DateTime? DateMax = null, LevelEnum? level = null, CancellationToken cancellationToken = default)
         {
             return await _LogEntryRepository.GetCountAsync(

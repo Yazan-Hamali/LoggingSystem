@@ -1,4 +1,5 @@
-﻿using LoggingSystem.Dtos;
+﻿using LoggingSystem.Data;
+using LoggingSystem.Dtos;
 using LoggingSystem.Entites;
 using LoggingSystem.Permissions;
 using Microsoft.AspNetCore.Authorization;

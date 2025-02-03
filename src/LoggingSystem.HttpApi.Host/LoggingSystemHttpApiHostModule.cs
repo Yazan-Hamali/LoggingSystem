@@ -130,7 +130,7 @@ public class LoggingSystemHttpApiHostModule : AbpModule
     {
         Configure<AbpAspNetCoreMvcOptions>(options =>
         {
-            options.ConventionalControllers.Create(typeof(LoggingSystemApplicationModule).Assembly);
+           // options.ConventionalControllers.Create(typeof(LoggingSystemApplicationModule).Assembly);
         });
     }
 

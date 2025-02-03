@@ -7,14 +7,15 @@ using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
+using Volo.Abp.AspNetCore.Mvc;
 
 namespace LoggingSystem.Controllers
 {
-    [RemoteService(Name = "LogsService")]
-    [Area("LogsService")]
-    [ControllerName("Logs")]
-    [Route("api/logs")]
-    public class LogsController : LoggingSystemController
+    [RemoteService(Name = "LogEntry")]
+    [Area("LogEntry")]
+    [ControllerName("LogEntry")]
+    [Route("api/app/log-entrys")]
+    public class LogsController : AbpController
     {
         private readonly ILogEntryAppService _logEntryAppService;
 
@@ -29,6 +30,11 @@ namespace LoggingSystem.Controllers
         {
 
             return _logEntryAppService.GetListAsync(input);
+        }
+        [HttpPost]
+        public virtual Task<LogEntrySharedDto> CreateAsync(LogEntryCreateDto input)
+        {
+            return _logEntryAppService.CreateAsync(input);
         }
     }
 }
