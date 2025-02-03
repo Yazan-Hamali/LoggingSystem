@@ -19,14 +19,15 @@ using Volo.Abp.Domain.Services;
 
 namespace LoggingSystem.Data
 {
-    public class S3FilesManager : DomainService
+    public class S3BucketManager : DomainService
     {
         private readonly string _logDirectory;
-        private readonly IConfiguration _configuration;
+        private readonly S3Client _client;
 
-        public S3FilesManager(IConfiguration configuration)
+        public S3BucketManager(IConfiguration configuration, S3Client client)
         {
-            _configuration = configuration;
+            _logDirectory = configuration["S3BucketTempDirectory"];
+            _client = client;
         }
 
         public async Task<LogEntrySharedDto> CreateAsync(
@@ -45,7 +46,6 @@ namespace LoggingSystem.Data
                 level
                 );
 
-            string datePath = Item.TimeStamp.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
             string logFileName = $"{Item.TimeStamp:yyyyMMdd}.log";
             string logFilePath = Path.Combine(_logDirectory, logFileName);
 
@@ -70,7 +70,8 @@ namespace LoggingSystem.Data
                 // Write log entry to the file
                 await File.AppendAllTextAsync(logFilePath, logJson + Environment.NewLine);
             }
-
+            var upload = File.ReadAllText(logFilePath);
+            await _client.UploadObjectAsync(logFileName, upload);
 
             return new LogEntrySharedDto
             {

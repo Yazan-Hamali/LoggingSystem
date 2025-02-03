@@ -44,7 +44,7 @@ namespace LoggingSystem.Data
                 level
                 );
 
-            string datePath = Item.TimeStamp.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            
             string logFileName = $"{Item.TimeStamp:yyyyMMdd}.log";
             string logFilePath = Path.Combine(_logDirectory, logFileName);
 

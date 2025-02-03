@@ -21,12 +21,14 @@ namespace LoggingSystem
         private readonly IConfiguration _configuration;
         private readonly DataBaseManager _DBManager;
         private readonly LocalFilesManager _LocalFilesManager;
+        private readonly S3BucketManager _S3BucketManager;
 
-        public LogEntryAppService(IConfiguration configuration, DataBaseManager dBManager, LocalFilesManager localFilesManager)
+        public LogEntryAppService(IConfiguration configuration, DataBaseManager dBManager, LocalFilesManager localFilesManager, S3BucketManager s3BucketManager)
         {
             _configuration = configuration;
             _DBManager = dBManager;
             _LocalFilesManager = localFilesManager;
+            _S3BucketManager = s3BucketManager;
         }
         [Authorize(LoggingSystemPermissions.LogEntry.Create)]
         public async Task<LogEntrySharedDto> CreateAsync(LogEntryCreateDto input)
@@ -45,6 +47,8 @@ namespace LoggingSystem
                         return await _DBManager.CreateAsync(input.Service, input.Message, input.TimeStamp.Value, input.Level);
                     case "LocalFiles":
                         return await _LocalFilesManager.CreateAsync(input.Service, input.Message, input.TimeStamp.Value, input.Level);
+                    case "S3Bucket":
+                        return await _S3BucketManager.CreateAsync(input.Service, input.Message, input.TimeStamp.Value, input.Level);
 
                     default:
                         throw new BusinessException("Please setup storage provider");
