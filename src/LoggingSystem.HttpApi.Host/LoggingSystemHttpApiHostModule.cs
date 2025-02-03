@@ -28,9 +28,9 @@ using Volo.Abp.Modularity;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.VirtualFileSystem;
+using Volo.Abp.AspNetCore.Authentication.JwtBearer;
 
 namespace LoggingSystem;
-
 [DependsOn(
     typeof(LoggingSystemHttpApiModule),
     typeof(AbpAutofacModule),
@@ -40,6 +40,7 @@ namespace LoggingSystem;
     typeof(AbpAspNetCoreMvcUiLeptonXLiteThemeModule),
     typeof(AbpAccountWebOpenIddictModule),
     typeof(AbpAspNetCoreSerilogModule),
+    typeof(AbpAspNetCoreAuthenticationJwtBearerModule),
     typeof(AbpSwashbuckleModule)
 )]
 public class LoggingSystemHttpApiHostModule : AbpModule
